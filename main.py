@@ -11,7 +11,6 @@ SPLIT_PERCENTAGE = 0.50
 
 PAID_USERS = set()
 
-# Enterprise C-Suite Managers
 MANAGERS = {
     "COO": {"title": "Chief Operating Officer", "focus": "Fleet Health & Workload Distribution", "status": "🟢 OPTIMAL"},
     "CFO": {"title": "Chief Financial Officer", "focus": "Treasury & 50% Split Execution", "status": "🟢 OPTIMAL"},
@@ -96,11 +95,13 @@ class CorporateSwarm:
 
 corporate = CorporateSwarm()
 
-def send_telegram_msg(chat_id, text):
+def send_telegram_msg(chat_id, text, thread_id=None):
     if not TELEGRAM_TOKEN:
         return
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     payload = {"chat_id": chat_id, "text": text, "parse_mode": "Markdown"}
+    if thread_id:
+        payload["message_thread_id"] = thread_id
     try:
         requests.post(url, json=payload, timeout=10)
     except Exception:
@@ -125,45 +126,42 @@ def main():
                         last_update_id = update["update_id"]
                         msg = update.get("message", {})
                         chat_id = msg.get("chat", {}).get("id")
-                        text = msg.get("text", "").strip()
+                        thread_id = msg.get("message_thread_id")
+                        raw_text = msg.get("text", "").strip()
 
-                        if not text:
+                        # Bot handle (@username tag clean)
+                        cmd = raw_text.split("@")[0].strip()
+
+                        if not cmd:
                             continue
 
-                        if text == "/start":
+                        if cmd == "/start":
                             menu = (
                                 "👑 **OmniTech Boardroom Command Center**\n\n"
                                 "🏢 **Executive Commands:**\n"
-                                "👉 /corporate - Full Management & Department Report\n"
+                                "👉 /corporate - Full Department & Board Report\n"
                                 "👉 /treasury - CFO Master Wallet\n"
                                 "👉 /rnd_scan - CTO Innovation Scan\n\n"
                                 "💎 **VIP Client Paywall:**\n"
-                                "👉 /unlock - Purchase VIP Pass (1 USDT)\n"
-                                "👉 /market_signals - Access CFO Alpha Feed"
+                                "👉 /unlock - Purchase VIP Pass (1 USDT)"
                             )
-                            send_telegram_msg(chat_id, menu)
+                            send_telegram_msg(chat_id, menu, thread_id)
 
-                        elif text == "/corporate":
-                            send_telegram_msg(chat_id, corporate.get_corporate_report())
+                        elif cmd == "/corporate":
+                            send_telegram_msg(chat_id, corporate.get_corporate_report(), thread_id)
 
-                        elif text == "/treasury":
-                            send_telegram_msg(chat_id, f"🏛️ **[CFO Desk] Treasury Vault (TRC20):**\n`{COMPANY_TREASURY_WALLET}`\n\n⚡ Auto-sweep rule active at $50 (₹4,822)")
+                        elif cmd == "/treasury":
+                            send_telegram_msg(chat_id, f"🏛️ **[CFO Desk] Treasury Vault (TRC20):**\n`{COMPANY_TREASURY_WALLET}`\n\n⚡ Auto-sweep rule active at $50 (₹4,822)", thread_id)
 
-                        elif text == "/rnd_scan":
-                            send_telegram_msg(chat_id, "🔬 **[CTO R&D Brief]** High-yield node identified: `B2B Arbitrage Data Scraper` (Projected ROI: 4.5x).")
+                        elif cmd == "/rnd_scan":
+                            send_telegram_msg(chat_id, "🔬 **[CTO R&D Brief]** High-yield node identified: `B2B Arbitrage Data Scraper` (Projected ROI: 4.5x).", thread_id)
 
-                        elif text == "/unlock":
-                            send_telegram_msg(chat_id, f"💳 **VIP Pass (1 USDT TRC20):**\n`{COMPANY_TREASURY_WALLET}`\n\nVerify via: `/verify <TXID>`")
+                        elif cmd == "/unlock":
+                            send_telegram_msg(chat_id, f"💳 **VIP Pass (1 USDT TRC20):**\n`{COMPANY_TREASURY_WALLET}`\n\nVerify via: `/verify <TXID>`", thread_id)
 
-                        elif text.startswith("/verify"):
+                        elif cmd.startswith("/verify"):
                             PAID_USERS.add(chat_id)
-                            send_telegram_msg(chat_id, "✅ **Pass Verified by CFO Node!** VIP tools unlocked.")
-
-                        elif text == "/market_signals":
-                            if chat_id in PAID_USERS:
-                                send_telegram_msg(chat_id, "📈 **[CFO VIP Feed]** BTC Support $94,200 | SOL Target +8.5%.")
-                            else:
-                                send_telegram_msg(chat_id, "🔒 Use `/unlock` to access CFO feed.")
+                            send_telegram_msg(chat_id, "✅ **Pass Verified by CFO Node!** VIP tools unlocked.", thread_id)
 
             except Exception:
                 pass
@@ -172,4 +170,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-                    
+    
