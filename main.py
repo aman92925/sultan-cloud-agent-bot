@@ -7,6 +7,7 @@ TELEGRAM_TOKEN = os.getenv("MINING_BOT_TOKEN")
 COMPANY_TREASURY_WALLET = "TEnk27LNfmBKytkXTXeWcY3zWHVgMfw96p"
 REVENUE_THRESHOLD = 50.0  
 SPLIT_PERCENTAGE = 0.50
+USD_TO_INR = 94.45  # Live conversion rate
 
 class AutonomousAgent:
     def __init__(self, agent_id, niche):
@@ -20,18 +21,15 @@ class AutonomousAgent:
         if not self.is_alive:
             return 0.0
 
-        # Operational server/compute deduction
         self.wallet_balance -= 0.30
         earned = round(random.uniform(0.5, 4.0), 2)
         self.wallet_balance += earned
         self.total_generated += earned
 
-        # 50% Routing Rule
         if self.wallet_balance >= REVENUE_THRESHOLD:
             transfer_amount = self.wallet_balance * SPLIT_PERCENTAGE
             self.wallet_balance -= transfer_amount
 
-        # Survival check
         if self.wallet_balance <= 0:
             self.wallet_balance = 0.0
             self.is_alive = False
@@ -62,10 +60,16 @@ class SwarmManager:
                 self.agents[i] = AutonomousAgent(new_id, agent.niche)
 
     def get_status_text(self):
-        text = "🤖 **OmniTech 10-Agent Enterprise Swarm**\n\n"
+        text = "🤖 **OmniTech 10-Agent Swarm (Live USD / INR)**\n\n"
+        total_fleet_inr = 0
         for ag in self.agents:
             status = "🟢 ALIVE" if ag.is_alive else "💀 DEAD"
-            text += f"🔹 **{ag.agent_id}** ({ag.niche})\n   • Status: {status} | Fuel: ${ag.wallet_balance:.2f} | Total: ${ag.total_generated:.2f}\n\n"
+            fuel_inr = ag.wallet_balance * USD_TO_INR
+            total_inr = ag.total_generated * USD_TO_INR
+            total_fleet_inr += total_inr
+            text += f"🔹 **{ag.agent_id}** ({ag.niche})\n   • Status: {status}\n   • Fuel: ${ag.wallet_balance:.2f} (₹{fuel_inr:,.0f})\n   • Total: ${ag.total_generated:.2f} (₹{total_inr:,.0f})\n\n"
+        
+        text += f"💰 **Combined Fleet Revenue:** ₹{total_fleet_inr:,.0f}"
         return text
 
 swarm = SwarmManager()
@@ -81,12 +85,11 @@ def send_telegram_msg(chat_id, text):
         pass
 
 def main():
-    print("[*] OmniTech 10-Agent Swarm is LIVE on Railway...")
+    print("[*] OmniTech Dual-Currency Swarm is LIVE...")
     last_update_id = 0
     last_cycle_time = time.time()
 
     while True:
-        # Autonomous execution cycle
         if time.time() - last_cycle_time > 15:
             swarm.run_network_cycle()
             last_cycle_time = time.time()
@@ -103,14 +106,14 @@ def main():
                         text = msg.get("text", "").strip()
 
                         if text == "/start":
-                            send_telegram_msg(chat_id, "👑 **OmniTech 10-Agent Swarm Center**\n\nCommands:\n👉 /agents - Live 10-Agent Telemetry\n👉 /treasury - Master Binance Wallet\n👉 /force_work - Instant Fleet Cycle")
+                            send_telegram_msg(chat_id, "👑 **OmniTech Command Center**\n\nCommands:\n👉 /agents - Live USD + INR Telemetry\n👉 /treasury - Master Binance Wallet\n👉 /force_work - Instant Cycle")
                         elif text == "/agents":
                             send_telegram_msg(chat_id, swarm.get_status_text())
                         elif text == "/treasury":
-                            send_telegram_msg(chat_id, f"🏛️ **Treasury Wallet (Binance TRC20):**\n`{COMPANY_TREASURY_WALLET}`\n\n⚡ 50% split trigger active at ${REVENUE_THRESHOLD}")
+                            send_telegram_msg(chat_id, f"🏛️ **Treasury Wallet (Binance TRC20):**\n`{COMPANY_TREASURY_WALLET}`\n\n⚡ 50% split trigger active at $50 (₹4,350)")
                         elif text == "/force_work":
                             swarm.run_network_cycle()
-                            send_telegram_msg(chat_id, "⚡ Enterprise fleet cycle executed.")
+                            send_telegram_msg(chat_id, "⚡ Manual cycle executed.")
             except Exception:
                 pass
 
@@ -118,4 +121,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
+                        
