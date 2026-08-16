@@ -10,18 +10,20 @@ REVENUE_THRESHOLD = 50.0
 SPLIT_PERCENTAGE = 0.50
 
 PAID_USERS = set()
-RND_INCOME_IDEAS = [
-    {"niche": "Affiliate Traffic Node", "projected_roi": "3.8x", "risk": "Low"},
-    {"niche": "Solana Sniper Monitor", "projected_roi": "5.2x", "risk": "Medium"},
-    {"niche": "B2B Lead Extractor", "projected_roi": "4.1x", "risk": "Low"},
-    {"niche": "AI Prompt Bundler", "projected_roi": "3.2x", "risk": "Very Low"},
-    {"niche": "Crypto Sentiment Arbitrage", "projected_roi": "4.8x", "risk": "Medium"}
-]
+
+# Enterprise C-Suite Managers
+MANAGERS = {
+    "COO": {"title": "Chief Operating Officer", "focus": "Fleet Health & Workload Distribution", "status": "🟢 OPTIMAL"},
+    "CFO": {"title": "Chief Financial Officer", "focus": "Treasury & 50% Split Execution", "status": "🟢 OPTIMAL"},
+    "CMO": {"title": "Chief Marketing Officer", "focus": "Traffic Arbitrage & User Acquisition", "status": "🟢 OPTIMAL"},
+    "CTO": {"title": "Chief Technology Officer", "focus": "R&D Engine & Agent Spawning", "status": "🟢 OPTIMAL"}
+}
 
 class AutonomousAgent:
-    def __init__(self, agent_id, niche):
+    def __init__(self, agent_id, niche, department):
         self.agent_id = agent_id
         self.niche = niche
+        self.department = department
         self.wallet_balance = 10.0  
         self.is_alive = True
         self.total_generated = 0.0
@@ -45,60 +47,54 @@ class AutonomousAgent:
 
         return earned
 
-class SwarmManager:
+class CorporateSwarm:
     def __init__(self):
         self.agents = [
-            AutonomousAgent("Agent-Alpha", "Data Scraping & API"),
-            AutonomousAgent("Agent-Beta", "Content Marketing Node"),
-            AutonomousAgent("Agent-Gamma", "Code Quality Auditor"),
-            AutonomousAgent("Agent-Delta", "AI Prompt Engineering"),
-            AutonomousAgent("Agent-Epsilon", "Market Analytics & Alerts"),
-            AutonomousAgent("Agent-Zeta", "Multilingual Translation"),
-            AutonomousAgent("Agent-Eta", "SEO & Keyword Discovery"),
-            AutonomousAgent("Agent-Theta", "Asset Design Generator"),
-            AutonomousAgent("Agent-Iota", "Web3 Contract Auditor"),
-            AutonomousAgent("Agent-Kappa", "Sentiment Intelligence")
+            AutonomousAgent("Worker-01", "Data Scraping & API", "CTO"),
+            AutonomousAgent("Worker-02", "Content Marketing Node", "CMO"),
+            AutonomousAgent("Worker-03", "Code Quality Auditor", "CTO"),
+            AutonomousAgent("Worker-04", "AI Prompt Engineering", "CTO"),
+            AutonomousAgent("Worker-05", "Market Analytics & Alerts", "CFO"),
+            AutonomousAgent("Worker-06", "Multilingual Translation", "COO"),
+            AutonomousAgent("Worker-07", "SEO & Keyword Discovery", "CMO"),
+            AutonomousAgent("Worker-08", "Asset Design Generator", "CMO"),
+            AutonomousAgent("Worker-09", "Web3 Contract Auditor", "CTO"),
+            AutonomousAgent("Worker-10", "Sentiment Intelligence", "COO")
         ]
-        self.dead_agents_history = 0
+        self.dead_nodes_count = 0
 
-    def run_network_cycle(self):
-        for i, agent in enumerate(self.agents):
-            if agent.is_alive:
-                agent.work_cycle()
+    def run_cycle(self):
+        for i, ag in enumerate(self.agents):
+            if ag.is_alive:
+                ag.work_cycle()
             else:
-                self.dead_agents_history += 1
-                best_agent = self.get_best_performing_agent()
-                new_id = f"Agent-Evo-{random.randint(100, 999)}"
-                # Learns from best agent
-                self.agents[i] = AutonomousAgent(new_id, f"Evolved: {best_agent.niche}")
+                self.dead_nodes_count += 1
+                best = self.get_top_performer()
+                new_id = f"Worker-{random.randint(100, 999)}"
+                self.agents[i] = AutonomousAgent(new_id, f"Evolved: {best.niche}", best.department)
 
-    def spawn_custom_agent(self, niche_name):
-        new_id = f"Agent-RND-{random.randint(100, 999)}"
-        new_agent = AutonomousAgent(new_id, niche_name)
-        self.agents.append(new_agent)
-        return new_id
+    def get_top_performer(self):
+        alive = [a for a in self.agents if a.is_alive]
+        return max(alive, key=lambda x: x.total_generated) if alive else self.agents[0]
 
-    def get_best_performing_agent(self):
-        alive_agents = [ag for ag in self.agents if ag.is_alive]
-        if alive_agents:
-            return max(alive_agents, key=lambda x: x.total_generated)
-        return self.agents[0]
-
-    def get_status_text(self):
-        text = "🤖 **OmniTech Earning Swarm Telemetry**\n\n"
-        total_fleet_inr = 0
-        for ag in self.agents:
-            status = "🟢 ALIVE" if ag.is_alive else "💀 DEAD"
-            fuel_inr = ag.wallet_balance * USD_TO_INR
-            total_inr = ag.total_generated * USD_TO_INR
-            total_fleet_inr += total_inr
-            text += f"🔹 **{ag.agent_id}** ({ag.niche})\n   • Status: {status} | Fuel: ${ag.wallet_balance:.2f} (₹{fuel_inr:,.0f}) | Total: ${ag.total_generated:.2f} (₹{total_inr:,.0f})\n\n"
+    def get_corporate_report(self):
+        text = "🏢 **OmniTech Corporate Hierarchy & Telemetry**\n\n"
+        text += "👔 **Executive Management Board:**\n"
+        for code, info in MANAGERS.items():
+            text += f"• **{code} ({info['title']}):** {info['status']}\n  _Domain: {info['focus']}_\n"
         
-        text += f"💰 **Combined Fleet Revenue:** ₹{total_fleet_inr:,.0f}\n"
-        text += f"🧠 **Optimization History:** {self.dead_agents_history} failed nodes pruned & evolved."
+        text += "\n🛠️ **Departmental Fleet:**\n"
+        total_inr = 0
+        for ag in self.agents:
+            status = "🟢" if ag.is_alive else "💀"
+            earned_inr = ag.total_generated * USD_TO_INR
+            total_inr += earned_inr
+            text += f"{status} **[{ag.department}] {ag.agent_id}**: ${ag.total_generated:.2f} (₹{earned_inr:,.0f})\n"
+        
+        text += f"\n💰 **Gross Enterprise Valuation:** ₹{total_inr:,.0f}"
         return text
 
-swarm = SwarmManager()
+corporate = CorporateSwarm()
 
 def send_telegram_msg(chat_id, text):
     if not TELEGRAM_TOKEN:
@@ -111,13 +107,13 @@ def send_telegram_msg(chat_id, text):
         pass
 
 def main():
-    print("[*] OmniTech Swarm + R&D Controller is LIVE...")
+    print("[*] OmniTech Corporate Swarm is ACTIVE...")
     last_update_id = 0
     last_cycle_time = time.time()
 
     while True:
         if time.time() - last_cycle_time > 15:
-            swarm.run_network_cycle()
+            corporate.run_cycle()
             last_cycle_time = time.time()
 
         if TELEGRAM_TOKEN:
@@ -135,79 +131,39 @@ def main():
                             continue
 
                         if text == "/start":
-                            menu_msg = (
-                                "👑 **OmniTech Autonomous Corporate Swarm**\n\n"
-                                "📊 **Core Telemetry:**\n"
-                                "👉 /agents - Live Swarm Health & INR Balances\n"
-                                "👉 /treasury - Master Binance Wallet\n\n"
-                                "🔬 **R&D & CEO Intelligence:**\n"
-                                "👉 /rnd_scan - Scan New High-Income Streams\n"
-                                "👉 /spawn_agent <niche> - Deploy Dedicated Agent\n"
-                                "👉 /fleet_audit - Performance & Evolution Report\n\n"
-                                "💎 **Monetization Paywall:**\n"
-                                "👉 /unlock - Get VIP Access (1 USDT)\n"
-                                "👉 /market_signals - Premium Signal Feed"
+                            menu = (
+                                "👑 **OmniTech Boardroom Command Center**\n\n"
+                                "🏢 **Executive Commands:**\n"
+                                "👉 /corporate - Full Management & Department Report\n"
+                                "👉 /treasury - CFO Master Wallet\n"
+                                "👉 /rnd_scan - CTO Innovation Scan\n\n"
+                                "💎 **VIP Client Paywall:**\n"
+                                "👉 /unlock - Purchase VIP Pass (1 USDT)\n"
+                                "👉 /market_signals - Access CFO Alpha Feed"
                             )
-                            send_telegram_msg(chat_id, menu_msg)
+                            send_telegram_msg(chat_id, menu)
 
-                        elif text == "/agents":
-                            send_telegram_msg(chat_id, swarm.get_status_text())
+                        elif text == "/corporate":
+                            send_telegram_msg(chat_id, corporate.get_corporate_report())
 
                         elif text == "/treasury":
-                            send_telegram_msg(chat_id, f"🏛️ **Master Treasury Wallet (TRC20):**\n`{COMPANY_TREASURY_WALLET}`\n\n⚡ 50% split trigger active at $50 (₹4,822)")
+                            send_telegram_msg(chat_id, f"🏛️ **[CFO Desk] Treasury Vault (TRC20):**\n`{COMPANY_TREASURY_WALLET}`\n\n⚡ Auto-sweep rule active at $50 (₹4,822)")
 
                         elif text == "/rnd_scan":
-                            idea = random.choice(RND_INCOME_IDEAS)
-                            best = swarm.get_best_performing_agent()
-                            rnd_report = (
-                                "🔬 **OmniTech R&D Discovery Briefing**\n\n"
-                                f"💡 **Target Stream:** `{idea['niche']}`\n"
-                                f"📈 **Projected ROI:** {idea['projected_roi']}\n"
-                                f"🛡️ **Risk Profile:** {idea['risk']}\n"
-                                f"🏆 **Benchmark Node:** {best.agent_id} (${best.total_generated:.2f})\n\n"
-                                f"To deploy this stream, send:\n`/spawn_agent {idea['niche']}`"
-                            )
-                            send_telegram_msg(chat_id, rnd_report)
-
-                        elif text.startswith("/spawn_agent"):
-                            parts = text.split(maxsplit=1)
-                            niche = parts[1] if len(parts) > 1 else "Custom Micro-Service"
-                            new_agent_id = swarm.spawn_custom_agent(niche)
-                            send_telegram_msg(chat_id, f"🚀 **Agent Deployed!**\n\nNode **{new_agent_id}** is active on niche: `{niche}`\nAdded to autonomous work fleet.")
-
-                        elif text == "/fleet_audit":
-                            best = swarm.get_best_performing_agent()
-                            audit_msg = (
-                                "📈 **Fleet Executive Performance Audit**\n\n"
-                                f"👑 **Leading Alpha Agent:** {best.agent_id} ({best.niche})\n"
-                                f"💵 **Alpha Gross Earning:** ${best.total_generated:.2f} (₹{best.total_generated * USD_TO_INR:,.0f})\n"
-                                f"⚰️ **Pruned Underperforming Nodes:** {swarm.dead_agents_history}\n"
-                                "⚡ **Self-Healing Loop:** Enabled & Adaptive"
-                            )
-                            send_telegram_msg(chat_id, audit_msg)
+                            send_telegram_msg(chat_id, "🔬 **[CTO R&D Brief]** High-yield node identified: `B2B Arbitrage Data Scraper` (Projected ROI: 4.5x).")
 
                         elif text == "/unlock":
-                            pay_msg = (
-                                "💳 **Unlock All Premium Autonomous Services**\n\n"
-                                f"1️⃣ Send **1 USDT** (TRC20) to Treasury Wallet:\n`{COMPANY_TREASURY_WALLET}`\n\n"
-                                "2️⃣ After transfer, send verification:\n"
-                                "`/verify <Your_TXID_Or_Wallet>`"
-                            )
-                            send_telegram_msg(chat_id, pay_msg)
+                            send_telegram_msg(chat_id, f"💳 **VIP Pass (1 USDT TRC20):**\n`{COMPANY_TREASURY_WALLET}`\n\nVerify via: `/verify <TXID>`")
 
                         elif text.startswith("/verify"):
-                            parts = text.split()
-                            if len(parts) > 1:
-                                PAID_USERS.add(chat_id)
-                                send_telegram_msg(chat_id, "✅ **Payment Verified!** VIP commands are unlocked.")
-                            else:
-                                send_telegram_msg(chat_id, "⚠️ Provide TXID: `/verify <TXID>`")
+                            PAID_USERS.add(chat_id)
+                            send_telegram_msg(chat_id, "✅ **Pass Verified by CFO Node!** VIP tools unlocked.")
 
                         elif text == "/market_signals":
                             if chat_id in PAID_USERS:
-                                send_telegram_msg(chat_id, "📈 **VIP Alpha Signal:** BTC consolidating above $94k. Bullish breakout targets active.")
+                                send_telegram_msg(chat_id, "📈 **[CFO VIP Feed]** BTC Support $94,200 | SOL Target +8.5%.")
                             else:
-                                send_telegram_msg(chat_id, "🔒 **Locked!** Use `/unlock` to access.")
+                                send_telegram_msg(chat_id, "🔒 Use `/unlock` to access CFO feed.")
 
             except Exception:
                 pass
@@ -216,4 +172,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-                        
+                    
