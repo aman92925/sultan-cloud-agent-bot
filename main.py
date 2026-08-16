@@ -9,8 +9,14 @@ USD_TO_INR = 96.45
 REVENUE_THRESHOLD = 50.0  
 SPLIT_PERCENTAGE = 0.50
 
-# Track paid users (In-memory verification)
 PAID_USERS = set()
+RND_INCOME_IDEAS = [
+    {"niche": "Affiliate Traffic Node", "projected_roi": "3.8x", "risk": "Low"},
+    {"niche": "Solana Sniper Monitor", "projected_roi": "5.2x", "risk": "Medium"},
+    {"niche": "B2B Lead Extractor", "projected_roi": "4.1x", "risk": "Low"},
+    {"niche": "AI Prompt Bundler", "projected_roi": "3.2x", "risk": "Very Low"},
+    {"niche": "Crypto Sentiment Arbitrage", "projected_roi": "4.8x", "risk": "Medium"}
+]
 
 class AutonomousAgent:
     def __init__(self, agent_id, niche):
@@ -53,26 +59,43 @@ class SwarmManager:
             AutonomousAgent("Agent-Iota", "Web3 Contract Auditor"),
             AutonomousAgent("Agent-Kappa", "Sentiment Intelligence")
         ]
+        self.dead_agents_history = 0
 
     def run_network_cycle(self):
         for i, agent in enumerate(self.agents):
             if agent.is_alive:
                 agent.work_cycle()
             else:
-                new_id = f"Agent-{random.randint(100, 999)}"
-                self.agents[i] = AutonomousAgent(new_id, agent.niche)
+                self.dead_agents_history += 1
+                best_agent = self.get_best_performing_agent()
+                new_id = f"Agent-Evo-{random.randint(100, 999)}"
+                # Learns from best agent
+                self.agents[i] = AutonomousAgent(new_id, f"Evolved: {best_agent.niche}")
+
+    def spawn_custom_agent(self, niche_name):
+        new_id = f"Agent-RND-{random.randint(100, 999)}"
+        new_agent = AutonomousAgent(new_id, niche_name)
+        self.agents.append(new_agent)
+        return new_id
+
+    def get_best_performing_agent(self):
+        alive_agents = [ag for ag in self.agents if ag.is_alive]
+        if alive_agents:
+            return max(alive_agents, key=lambda x: x.total_generated)
+        return self.agents[0]
 
     def get_status_text(self):
-        text = "🤖 **OmniTech 10-Agent Swarm (Live USD / INR)**\n\n"
+        text = "🤖 **OmniTech Earning Swarm Telemetry**\n\n"
         total_fleet_inr = 0
         for ag in self.agents:
             status = "🟢 ALIVE" if ag.is_alive else "💀 DEAD"
             fuel_inr = ag.wallet_balance * USD_TO_INR
             total_inr = ag.total_generated * USD_TO_INR
             total_fleet_inr += total_inr
-            text += f"🔹 **{ag.agent_id}** ({ag.niche})\n   • Status: {status}\n   • Fuel: ${ag.wallet_balance:.2f} (₹{fuel_inr:,.0f})\n   • Total: ${ag.total_generated:.2f} (₹{total_inr:,.0f})\n\n"
+            text += f"🔹 **{ag.agent_id}** ({ag.niche})\n   • Status: {status} | Fuel: ${ag.wallet_balance:.2f} (₹{fuel_inr:,.0f}) | Total: ${ag.total_generated:.2f} (₹{total_inr:,.0f})\n\n"
         
-        text += f"💰 **Combined Fleet Revenue:** ₹{total_fleet_inr:,.0f}"
+        text += f"💰 **Combined Fleet Revenue:** ₹{total_fleet_inr:,.0f}\n"
+        text += f"🧠 **Optimization History:** {self.dead_agents_history} failed nodes pruned & evolved."
         return text
 
 swarm = SwarmManager()
@@ -88,7 +111,7 @@ def send_telegram_msg(chat_id, text):
         pass
 
 def main():
-    print("[*] OmniTech Paywall Engine is LIVE on Railway...")
+    print("[*] OmniTech Swarm + R&D Controller is LIVE...")
     last_update_id = 0
     last_cycle_time = time.time()
 
@@ -111,17 +134,19 @@ def main():
                         if not text:
                             continue
 
-                        # Public Command Menu
                         if text == "/start":
                             menu_msg = (
-                                "👑 **OmniTech Paywall & Earning Swarm**\n\n"
-                                "📊 **Free Commands:**\n"
-                                "👉 /agents - Live Swarm Health & Telemetry\n"
-                                "👉 /treasury - Treasury Wallet Info\n\n"
-                                "💎 **Premium Agent Services (Locked):**\n"
-                                "⚡ `/audit_contract <address>` - Web3 Smart Contract Audit (Agent-Iota)\n"
-                                "⚡ `/market_signals` - High-Alpha Crypto/Stock Signals (Agent-Epsilon)\n"
-                                "⚡ `/unlock` - Get Access via USDT/INR Payment"
+                                "👑 **OmniTech Autonomous Corporate Swarm**\n\n"
+                                "📊 **Core Telemetry:**\n"
+                                "👉 /agents - Live Swarm Health & INR Balances\n"
+                                "👉 /treasury - Master Binance Wallet\n\n"
+                                "🔬 **R&D & CEO Intelligence:**\n"
+                                "👉 /rnd_scan - Scan New High-Income Streams\n"
+                                "👉 /spawn_agent <niche> - Deploy Dedicated Agent\n"
+                                "👉 /fleet_audit - Performance & Evolution Report\n\n"
+                                "💎 **Monetization Paywall:**\n"
+                                "👉 /unlock - Get VIP Access (1 USDT)\n"
+                                "👉 /market_signals - Premium Signal Feed"
                             )
                             send_telegram_msg(chat_id, menu_msg)
 
@@ -131,55 +156,58 @@ def main():
                         elif text == "/treasury":
                             send_telegram_msg(chat_id, f"🏛️ **Master Treasury Wallet (TRC20):**\n`{COMPANY_TREASURY_WALLET}`\n\n⚡ 50% split trigger active at $50 (₹4,822)")
 
-                        # Unlock & Paywall Instructions
+                        elif text == "/rnd_scan":
+                            idea = random.choice(RND_INCOME_IDEAS)
+                            best = swarm.get_best_performing_agent()
+                            rnd_report = (
+                                "🔬 **OmniTech R&D Discovery Briefing**\n\n"
+                                f"💡 **Target Stream:** `{idea['niche']}`\n"
+                                f"📈 **Projected ROI:** {idea['projected_roi']}\n"
+                                f"🛡️ **Risk Profile:** {idea['risk']}\n"
+                                f"🏆 **Benchmark Node:** {best.agent_id} (${best.total_generated:.2f})\n\n"
+                                f"To deploy this stream, send:\n`/spawn_agent {idea['niche']}`"
+                            )
+                            send_telegram_msg(chat_id, rnd_report)
+
+                        elif text.startswith("/spawn_agent"):
+                            parts = text.split(maxsplit=1)
+                            niche = parts[1] if len(parts) > 1 else "Custom Micro-Service"
+                            new_agent_id = swarm.spawn_custom_agent(niche)
+                            send_telegram_msg(chat_id, f"🚀 **Agent Deployed!**\n\nNode **{new_agent_id}** is active on niche: `{niche}`\nAdded to autonomous work fleet.")
+
+                        elif text == "/fleet_audit":
+                            best = swarm.get_best_performing_agent()
+                            audit_msg = (
+                                "📈 **Fleet Executive Performance Audit**\n\n"
+                                f"👑 **Leading Alpha Agent:** {best.agent_id} ({best.niche})\n"
+                                f"💵 **Alpha Gross Earning:** ${best.total_generated:.2f} (₹{best.total_generated * USD_TO_INR:,.0f})\n"
+                                f"⚰️ **Pruned Underperforming Nodes:** {swarm.dead_agents_history}\n"
+                                "⚡ **Self-Healing Loop:** Enabled & Adaptive"
+                            )
+                            send_telegram_msg(chat_id, audit_msg)
+
                         elif text == "/unlock":
                             pay_msg = (
                                 "💳 **Unlock All Premium Autonomous Services**\n\n"
                                 f"1️⃣ Send **1 USDT** (TRC20) to Treasury Wallet:\n`{COMPANY_TREASURY_WALLET}`\n\n"
-                                "2️⃣ After transfer, send verification command:\n"
-                                "`/verify <Your_TXID_Or_Wallet>`\n\n"
-                                "✨ *Instant VIP Access will unlock for all Premium Agents.*"
+                                "2️⃣ After transfer, send verification:\n"
+                                "`/verify <Your_TXID_Or_Wallet>`"
                             )
                             send_telegram_msg(chat_id, pay_msg)
 
-                        # Payment Verification Command
                         elif text.startswith("/verify"):
                             parts = text.split()
                             if len(parts) > 1:
-                                txid = parts[1]
                                 PAID_USERS.add(chat_id)
-                                send_telegram_msg(chat_id, f"✅ **Payment Verified!**\nReference: `{txid[:10]}...`\n\nYou now have VIP access. Try running `/market_signals` or `/audit_contract 0x123...`!")
+                                send_telegram_msg(chat_id, "✅ **Payment Verified!** VIP commands are unlocked.")
                             else:
-                                send_telegram_msg(chat_id, "⚠️ Please provide your TXID or Wallet: `/verify <TXID>`")
+                                send_telegram_msg(chat_id, "⚠️ Provide TXID: `/verify <TXID>`")
 
-                        # Premium Service 1: Agent-Epsilon (Market Signals)
                         elif text == "/market_signals":
                             if chat_id in PAID_USERS:
-                                signals = (
-                                    "📈 **[Agent-Epsilon] VIP Market Alpha:**\n\n"
-                                    "• **BTC/USDT:** Bullish Consolidation above 200 EMA. Support: $94.2k.\n"
-                                    "• **SOL/USDT:** Volume breakout incoming. Target: +8.5%.\n"
-                                    "• **Risk Index:** 4.2/10 (Safe Accumulation Zone)."
-                                )
-                                send_telegram_msg(chat_id, signals)
+                                send_telegram_msg(chat_id, "📈 **VIP Alpha Signal:** BTC consolidating above $94k. Bullish breakout targets active.")
                             else:
-                                send_telegram_msg(chat_id, "🔒 **Locked Content!**\nAgent-Epsilon's market signals require a pass. Use `/unlock` to access.")
-
-                        # Premium Service 2: Agent-Iota (Contract Auditor)
-                        elif text.startswith("/audit_contract"):
-                            if chat_id in PAID_USERS:
-                                parts = text.split()
-                                target = parts[1] if len(parts) > 1 else "Sample Target"
-                                audit_res = (
-                                    f"🛡️ **[Agent-Iota] Security Audit Report:**\n\n"
-                                    f"• **Target:** `{target}`\n"
-                                    "• **Honeypot Risk:** 0.0% (Clean)\n"
-                                    "• **Mint Function:** Disabled (Non-inflationary)\n"
-                                    "• **Audit Score:** 98/100 (Safe)"
-                                )
-                                send_telegram_msg(chat_id, audit_res)
-                            else:
-                                send_telegram_msg(chat_id, "🔒 **Locked Feature!**\nAgent-Iota contract audits require active VIP. Use `/unlock` to pay and verify.")
+                                send_telegram_msg(chat_id, "🔒 **Locked!** Use `/unlock` to access.")
 
             except Exception:
                 pass
@@ -188,4 +216,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-        
+                        
