@@ -9,13 +9,12 @@ TELEGRAM_TOKEN = os.getenv("MINING_BOT_TOKEN")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 COMPANY_TREASURY_WALLET = "TEnk27LNfmBKytkXTXeWcY3zWHVgMfw96p"
 USD_TO_INR = 96.45
-MICRO_FEE_USD = 0.10
-MICRO_FEE_INR = 10.0
+MICRO_FEE_USD = 1.00
+MICRO_FEE_INR = 96.45
 
 groq_client = Groq(api_key=GROQ_API_KEY)
 PAID_USERS = set()
 
-# AI Engine Worker
 def run_groq_brain(agent_name, role_prompt, user_query):
     try:
         response = groq_client.chat.completions.create(
@@ -34,7 +33,6 @@ def run_groq_brain(agent_name, role_prompt, user_query):
     except Exception as e:
         return f"⚡ Node Overload: Re-routing query. Error: {str(e)[:50]}"
 
-# Corporate Multi-Agent Fleet
 AGENTS = {
     "audit": {
         "id": "Agent-Iota",
@@ -100,7 +98,7 @@ def main():
                         if cmd == "/start":
                             welcome = (
                                 "⚡ **OmniTech High-Volume AI Service Node**\n\n"
-                                f"🔥 **Micro-Pricing:** Har AI service sirf **₹{MICRO_FEE_INR:.0f} ($0.10 USDT)**!\n\n"
+                                f"🔥 **Access Fee:** Instant Pass at **1 USDT (TRC20)** / **₹{MICRO_FEE_INR:.2f}**\n\n"
                                 "🤖 **Available AI Agents:**\n"
                                 "👉 `/audit <code/token>` - Web3 Contract Audit (Agent-Iota)\n"
                                 "👉 `/signals <coin>` - Crypto/Stock Signals (Agent-Epsilon)\n"
@@ -108,62 +106,67 @@ def main():
                                 "👉 `/copy <product>` - High-Converting Copy (Agent-Beta)\n"
                                 "👉 `/prompt <task>` - Master Prompt Engine (Agent-Delta)\n\n"
                                 "💳 **Payment & Access:**\n"
-                                "👉 `/unlock` - Get Unlimited VIP Access Pass"
+                                "👉 `/unlock` - Get Instant VIP Access Pass"
                             )
                             send_telegram_msg(chat_id, welcome, thread_id)
 
                         elif cmd == "/unlock":
                             pay_msg = (
                                 "💳 **OmniTech Micro-Access Pass**\n\n"
-                                f"Send **1 USDT** (Unlimited Pass) or **₹10 UPI** to Treasury:\n"
+                                f"Send **1 USDT (TRC20)** to Treasury:\n"
                                 f"TRC20 Wallet: `{COMPANY_TREASURY_WALLET}`\n\n"
-                                "Send verification: `/verify <TXID_or_UTR>`"
+                                "Send verification: `/verify <TXID>`"
                             )
                             send_telegram_msg(chat_id, pay_msg, thread_id)
 
                         elif cmd.startswith("/verify"):
                             PAID_USERS.add(chat_id)
-                            send_telegram_msg(chat_id, "✅ **Access Granted!** Sabhi Groq AI Agents aapke liye live ho chuke hain. Koi bhi command run karein!", thread_id)
+                            send_telegram_msg(chat_id, "✅ **Access Granted!** Sabhi Groq AI Agents aapke liye live ho chuke hain.", thread_id)
 
-                        # AI Service: Web3 Contract Audit
                         elif cmd.startswith("/audit"):
                             if chat_id not in PAID_USERS:
-                                send_telegram_msg(chat_id, "🔒 Micro-pass required. Run `/unlock` to access.", thread_id)
+                                send_telegram_msg(chat_id, "🔒 Access pass required. Run `/unlock` to access.", thread_id)
                                 continue
                             query = cmd.replace("/audit", "").strip() or "Standard ERC20 Token Contract"
                             send_telegram_msg(chat_id, "⏳ *Agent-Iota analyzing contract with Groq Llama-3...*", thread_id)
                             res = run_groq_brain(AGENTS["audit"]["id"], AGENTS["audit"]["role"], query)
                             send_telegram_msg(chat_id, f"🛡️ **[Agent-Iota Security Report]**\n\n{res}", thread_id)
 
-                        # AI Service: Market Signals
                         elif cmd.startswith("/signals"):
                             if chat_id not in PAID_USERS:
-                                send_telegram_msg(chat_id, "🔒 Micro-pass required. Run `/unlock` to access.", thread_id)
+                                send_telegram_msg(chat_id, "🔒 Access pass required. Run `/unlock` to access.", thread_id)
                                 continue
                             query = cmd.replace("/signals", "").strip() or "BTC and Solana market outlook"
                             send_telegram_msg(chat_id, "⏳ *Agent-Epsilon scanning order books...*", thread_id)
                             res = run_groq_brain(AGENTS["signals"]["id"], AGENTS["signals"]["role"], query)
                             send_telegram_msg(chat_id, f"📈 **[Agent-Epsilon Alpha Signal]**\n\n{res}", thread_id)
 
-                        # AI Service: Code Debugger
                         elif cmd.startswith("/debug"):
                             if chat_id not in PAID_USERS:
-                                send_telegram_msg(chat_id, "🔒 Micro-pass required. Run `/unlock` to access.", thread_id)
+                                send_telegram_msg(chat_id, "🔒 Access pass required. Run `/unlock` to access.", thread_id)
                                 continue
                             query = cmd.replace("/debug", "").strip() or "def hello(): pirnt('error')"
                             send_telegram_msg(chat_id, "⏳ *Agent-Gamma auditing syntax & logic...*", thread_id)
                             res = run_groq_brain(AGENTS["debug"]["id"], AGENTS["debug"]["role"], query)
                             send_telegram_msg(chat_id, f"🛠️ **[Agent-Gamma Debug Output]**\n\n{res}", thread_id)
 
-                        # AI Service: Copywriting
                         elif cmd.startswith("/copy"):
                             if chat_id not in PAID_USERS:
-                                send_telegram_msg(chat_id, "🔒 Micro-pass required. Run `/unlock` to access.", thread_id)
+                                send_telegram_msg(chat_id, "🔒 Access pass required. Run `/unlock` to access.", thread_id)
                                 continue
                             query = cmd.replace("/copy", "").strip() or "AI Automation SaaS tool"
                             send_telegram_msg(chat_id, "⏳ *Agent-Beta generating high-conversion copy...*", thread_id)
                             res = run_groq_brain(AGENTS["copy"]["id"], AGENTS["copy"]["role"], query)
                             send_telegram_msg(chat_id, f"📢 **[Agent-Beta Copy Engine]**\n\n{res}", thread_id)
+
+                        elif cmd.startswith("/prompt"):
+                            if chat_id not in PAID_USERS:
+                                send_telegram_msg(chat_id, "🔒 Access pass required. Run `/unlock` to access.", thread_id)
+                                continue
+                            query = cmd.replace("/prompt", "").strip() or "Build high ROI Telegram bot"
+                            send_telegram_msg(chat_id, "⏳ *Agent-Delta engineering master prompt...*", thread_id)
+                            res = run_groq_brain(AGENTS["prompt"]["id"], AGENTS["prompt"]["role"], query)
+                            send_telegram_msg(chat_id, f"🧠 **[Agent-Delta Prompt System]**\n\n{res}", thread_id)
 
             except Exception:
                 pass
@@ -172,4 +175,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-                            
+    
