@@ -3,10 +3,7 @@ import time
 import random
 import requests
 
-# Render ke Environment Variables se token fetch hoga
 TELEGRAM_TOKEN = os.getenv("MINING_BOT_TOKEN")
-
-# Aapka Binance TRC20 Wallet Address
 COMPANY_TREASURY_WALLET = "TEnk27LNfmBKytkXTXeWcY3zWHVgMfw96p"
 REVENUE_THRESHOLD = 50.0  
 SPLIT_PERCENTAGE = 0.50
@@ -23,15 +20,18 @@ class AutonomousAgent:
         if not self.is_alive:
             return 0.0
 
-        self.wallet_balance -= 0.50
-        earned = round(random.uniform(0.5, 3.5), 2)
+        # Operational server/compute deduction
+        self.wallet_balance -= 0.30
+        earned = round(random.uniform(0.5, 4.0), 2)
         self.wallet_balance += earned
         self.total_generated += earned
 
+        # 50% Routing Rule
         if self.wallet_balance >= REVENUE_THRESHOLD:
             transfer_amount = self.wallet_balance * SPLIT_PERCENTAGE
             self.wallet_balance -= transfer_amount
 
+        # Survival check
         if self.wallet_balance <= 0:
             self.wallet_balance = 0.0
             self.is_alive = False
@@ -43,7 +43,14 @@ class SwarmManager:
         self.agents = [
             AutonomousAgent("Agent-Alpha", "Data Scraping & API"),
             AutonomousAgent("Agent-Beta", "Content Marketing Node"),
-            AutonomousAgent("Agent-Gamma", "Code Quality Auditor")
+            AutonomousAgent("Agent-Gamma", "Code Quality Auditor"),
+            AutonomousAgent("Agent-Delta", "AI Prompt Engineering"),
+            AutonomousAgent("Agent-Epsilon", "Market Analytics & Alerts"),
+            AutonomousAgent("Agent-Zeta", "Multilingual Translation"),
+            AutonomousAgent("Agent-Eta", "SEO & Keyword Discovery"),
+            AutonomousAgent("Agent-Theta", "Asset Design Generator"),
+            AutonomousAgent("Agent-Iota", "Web3 Contract Auditor"),
+            AutonomousAgent("Agent-Kappa", "Sentiment Intelligence")
         ]
 
     def run_network_cycle(self):
@@ -55,10 +62,10 @@ class SwarmManager:
                 self.agents[i] = AutonomousAgent(new_id, agent.niche)
 
     def get_status_text(self):
-        text = "🤖 **OmniTech Autonomous Telemetry**\n\n"
+        text = "🤖 **OmniTech 10-Agent Enterprise Swarm**\n\n"
         for ag in self.agents:
             status = "🟢 ALIVE" if ag.is_alive else "💀 DEAD"
-            text += f"🔹 **{ag.agent_id}** ({ag.niche})\n   • Status: {status}\n   • Fuel: ${ag.wallet_balance:.2f}\n   • Total: ${ag.total_generated:.2f}\n\n"
+            text += f"🔹 **{ag.agent_id}** ({ag.niche})\n   • Status: {status} | Fuel: ${ag.wallet_balance:.2f} | Total: ${ag.total_generated:.2f}\n\n"
         return text
 
 swarm = SwarmManager()
@@ -74,17 +81,16 @@ def send_telegram_msg(chat_id, text):
         pass
 
 def main():
-    print("[*] OmniTechAutoEarning Swarm is running in Cloud...")
+    print("[*] OmniTech 10-Agent Swarm is LIVE on Railway...")
     last_update_id = 0
     last_cycle_time = time.time()
 
     while True:
-        # Har 20 second mein swarm cycle
-        if time.time() - last_cycle_time > 20:
+        # Autonomous execution cycle
+        if time.time() - last_cycle_time > 15:
             swarm.run_network_cycle()
             last_cycle_time = time.time()
 
-        # Telegram polling logic
         if TELEGRAM_TOKEN:
             try:
                 url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/getUpdates?offset={last_update_id + 1}&timeout=5"
@@ -97,14 +103,14 @@ def main():
                         text = msg.get("text", "").strip()
 
                         if text == "/start":
-                            send_telegram_msg(chat_id, "👑 **OmniTech Auto Earning Command Center**\n\nBot: @OmniTechautoearningBot\n\nCommands:\n👉 /agents - Live Swarm Telemetry\n👉 /treasury - Master Binance Wallet\n👉 /force_work - Instant Cycle Run")
+                            send_telegram_msg(chat_id, "👑 **OmniTech 10-Agent Swarm Center**\n\nCommands:\n👉 /agents - Live 10-Agent Telemetry\n👉 /treasury - Master Binance Wallet\n👉 /force_work - Instant Fleet Cycle")
                         elif text == "/agents":
                             send_telegram_msg(chat_id, swarm.get_status_text())
                         elif text == "/treasury":
                             send_telegram_msg(chat_id, f"🏛️ **Treasury Wallet (Binance TRC20):**\n`{COMPANY_TREASURY_WALLET}`\n\n⚡ 50% split trigger active at ${REVENUE_THRESHOLD}")
                         elif text == "/force_work":
                             swarm.run_network_cycle()
-                            send_telegram_msg(chat_id, "⚡ Manual cycle executed across all swarm nodes.")
+                            send_telegram_msg(chat_id, "⚡ Enterprise fleet cycle executed.")
             except Exception:
                 pass
 
@@ -112,4 +118,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-          
+    
