@@ -167,4 +167,35 @@ def main():
 
                         else:
                             # Quota Engine
+                            if not is_vip(user) and user["queries"] >= FREE_LIMIT:
+                                send_msg(
+                                    chat_id,
+                                    "🔒 **10 Free Queries Exhausted!**\n\n"
+                                    "Unlock Unlimited VIP Access starting at just ₹9 / $1 USDT.\n"
+                                    "👉 Check options: `/plans`"
+                                )
+                                continue
+
+                            if not is_vip(user):
+                                user["queries"] += 1
+                                remaining = FREE_LIMIT - user["queries"]
+                                status_footer = f"\n\n*(Trial: {user['queries']}/{FREE_LIMIT} used | {remaining} left)*"
+                            else:
+                                status_footer = "\n\n*(VIP Pass: Unlimited Access)*"
+
+                            send_msg(chat_id, "⏳ *OmniTech AI computing solution...*")
+                            res = run_groq("OmniTech AI", "Expert Multi-Domain Consultant", raw_text)
+                            send_msg(chat_id, f"{res}{status_footer}")
+
+            except Exception:
+                pass
+
+        time.sleep(1)
+
+import subprocess
+
+if __name__ == "__main__":
+    subprocess.Popen(["python", "promo.py"])
+    main()
+    
                         
